@@ -1,0 +1,76 @@
+<html>
+ <head>
+  <style>
+        table, th, td {
+          border: 1px solid black;
+          border-radius: 10px;
+        }
+        th {
+          background-color: #96D4D4;
+        }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.0.2.js"></script> 
+  <script type="text/javascript">
+    const nodes_array = [
+        {NodeName:"HOSTNAME1",NodeAddress:"0x0000000000000000000000000000000000000001"},
+        {NodeName:"HOSTNAME2",NodeAddress:"0x0000000000000000000000000000000000000002"},
+        {NodeName:"HOSTNAME3",NodeAddress:"0x0000000000000000000000000000000000000003"}
+];
+
+    $(window).load(function(){
+        $(function() {
+            for (let node of nodes_array) {
+
+                $.getJSON(`https://blockexplorer.bloxberg.org/api?module=account&action=txlist&address=${node.NodeAddress}`, function(data) {
+                    var node_transactions_array = data.result;
+                    var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
+                    $('#blockchain').text(last_transaction_time);
+                    
+                    //debugging
+                    /*console.log(node_address)
+                    console.log({CurrentTimestamp: Date.now()/1000})
+                    console.log({LastTransactionTimestamp: (node_transactions_array[0]).timeStamp})
+                    console.log({TimestampDifference: Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600)})*/
+                    
+                    var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
+
+                    // Insert a row at the end of table
+                    var newRow = tbodyRef.insertRow();
+
+                    // Insert a cell at the end of the row
+                    var newNodeNameCell = newRow.insertCell();
+                    var newNodeAddressCell = newRow.insertCell();
+                    var newTransactionTimeCell = newRow.insertCell();
+
+                    // Append a text node to the cell
+                    var newNodeNameText = document.createTextNode(node.NodeName);
+                    newNodeNameCell.appendChild(newNodeNameText);
+                    var newNodeAddressText = document.createTextNode(node.NodeAddress);
+                    newNodeAddressCell.appendChild(newNodeAddressText);
+                    var newTransactionTimeText = document.createTextNode(`${last_transaction_time.toString()}`);
+                    newTransactionTimeCell.appendChild(newTransactionTimeText);
+                });
+            };
+        });
+    });
+
+  </script> 
+ </head> 
+ <body> 
+  <!--<div id="blockchain"></div>-->
+  
+  <table id="myTable" style="width:100%">
+    <thead>
+        <tr>
+            <th>Node Name</th>
+            <th>Node Address</th>
+            <th>Last Transaction</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+ </body>
+</html>
