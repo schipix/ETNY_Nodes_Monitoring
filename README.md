@@ -10,6 +10,7 @@
 # Future developements as of 26.12.2022:
 #   - Load the nodes list from an external JSON file
 #   - Add some of the Ethernity Cloud corporate identity items (e.g. Logo, colours)
+#   - Add a favicon
 #   - Sort the resulting array descending, based on the Last Transaction Call attribute
 
 
