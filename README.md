@@ -6,4 +6,11 @@
 # Future developements as of 26.12.2022:
 #   - Load the nodes list from an external JSON file
 #   - Add some of the Ethernity Cloud corporate identity items (e.g. Logo, colours)
-#   - Sort the resulting array descending, based on the Last Transaction Call attribute 
+#   - Sort the resulting array descending, based on the Last Transaction Call attribute
+
+
+# HOW TO modify the webpage so it shows your own nodes:
+#   - Open the html file in an text editor (e.g. Notepad)
+#   - Search for "const nodes_array"
+#   - For each node you want to monitor add a new line using the three templates as a model
+#   - Delete the three lines representing the templates.
