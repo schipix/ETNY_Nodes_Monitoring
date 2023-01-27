@@ -40,15 +40,6 @@
                     var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
                     $('#blockchain').text(last_transaction_time);
 
-                    const NodeInfo = {
-                      NodeName: node.NodeName,
-                      NodeAddress: node.NodeAddress,
-                      LastTransaction: last_transaction_time.toString()
-                    };
-                    ArrayToBeSorted.push(NodeInfo);
-                    
-                    console.log(ArrayToBeSorted);
-
                     //debugging
                     /*console.log(node_address)
                     console.log({CurrentTimestamp: Date.now()/1000})
