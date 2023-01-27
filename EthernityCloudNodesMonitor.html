@@ -32,13 +32,23 @@
 
     $(window).load(function(){
         $(function() {
+            const ArrayToBeSorted = [];
             for (let node of nodes_array) {
 
                 $.getJSON(`https://blockexplorer.bloxberg.org/api?module=account&action=txlist&address=${node.NodeAddress}`, function(data) {
                     var node_transactions_array = data.result;
                     var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
                     $('#blockchain').text(last_transaction_time);
+
+                    const NodeInfo = {
+                      NodeName: node.NodeName,
+                      NodeAddress: node.NodeAddress,
+                      LastTransaction: last_transaction_time.toString()
+                    };
+                    ArrayToBeSorted.push(NodeInfo);
                     
+                    console.log(ArrayToBeSorted);
+
                     //debugging
                     /*console.log(node_address)
                     console.log({CurrentTimestamp: Date.now()/1000})
@@ -47,7 +57,7 @@
                     
                     var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
 
-                    // Insert a row at the end of table
+                    // Insert a new row at the end of table
                     var newRow = tbodyRef.insertRow();
 
                     // Insert a cell at the end of the row
