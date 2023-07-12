@@ -4,6 +4,9 @@
         img {
           width:128px;
           height:128px;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
         }
         table, th, td {
           border: 1px solid black;
@@ -13,16 +16,54 @@
           background-color: #96D4D4;
         }
         footer {
-          border: 5px solid #96D4D4;
-          position: fixed;
+          border: 2px solid #96D4D4;
           bottom: 10;
           right: 10;
-          width: 37%;
-          text-align: right;
+          text-align: center;
+          font-size:75%;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Responsive table */
+        @media screen and (max-width: 600px) {
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0 1em;
+            }
+            thead {
+                display: none;
+            }
+            tr:nth-of-type(2n) {
+                background-color: #f8f8f8;
+            }
+            tr td:first-child {
+                background: #f8f8f8;
+                font-weight: bold;
+                font-size: 1.3em;
+            }
+            td {
+                display: block;
+                text-align: right;
+                padding: 1em 0; /* Add space between rows */
+            }
+            td::before {
+                content: attr(data-label);
+                float: left;
+                text-transform: uppercase;
+                font-weight: bold;
+            }
         }
   </style>
-  <meta name="viewport" content="width=device-width, initial-scale=1"> 
-  <script type="text/javascript" src="https://code.jquery.com/jquery-2.0.2.js"></script> 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="3600">
+  <title>My Ethernity Nodes Monitor</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.0.2.js"></script>
+  <!--<script type="module" src="NodeImporter.js"></script>-->
   <script type="text/javascript">
     const nodes_array = [
         {NodeName:"HOSTNAME1",NodeAddress:"0x0000000000000000000000000000000000000001"},
@@ -30,51 +71,77 @@
         {NodeName:"HOSTNAME3",NodeAddress:"0x0000000000000000000000000000000000000003"}
 ];
 
-    $(window).load(function(){
-        $(function() {
-            for (let node of nodes_array) {
+$(window).load(function(){
+    $(function() {
+        let nodeInfoArray = [];
+        let promises = nodes_array.map(node => {
+            return $.getJSON(`https://blockexplorer.bloxberg.org/api?module=account&action=txlist&address=${node.NodeAddress}`, function(data) {
+                var node_transactions_array = data.result;
+                var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
 
-                $.getJSON(`https://blockexplorer.bloxberg.org/api?module=account&action=txlist&address=${node.NodeAddress}`, function(data) {
-                    var node_transactions_array = data.result;
-                    var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
-                    $('#blockchain').text(last_transaction_time);
-                    
-                    //debugging
-                    /*console.log(node_address)
-                    console.log({CurrentTimestamp: Date.now()/1000})
-                    console.log({LastTransactionTimestamp: (node_transactions_array[0]).timeStamp})
-                    console.log({TimestampDifference: Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600)})*/
-                    
-                    var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
+                const NodeInfo = {
+                    NodeName: node.NodeName,
+                    NodeAddress: node.NodeAddress,
+                    LastTransaction: last_transaction_time
+                };
 
-                    // Insert a row at the end of table
-                    var newRow = tbodyRef.insertRow();
+                nodeInfoArray.push(NodeInfo);
+            });
+        });
 
-                    // Insert a cell at the end of the row
-                    var newNodeNameCell = newRow.insertCell();
-                    var newNodeAddressCell = newRow.insertCell();
-                    var newTransactionTimeCell = newRow.insertCell();
+        // When all promises (requests) have finished...
+        $.when.apply($, promises).then(function() {
+            // Sort the nodeInfoArray by LastTransaction in ascending order
+            nodeInfoArray.sort((b, a) => a.LastTransaction - b.LastTransaction);
 
-                    // Append a text node to the cell
-                    var newNodeNameText = document.createTextNode(node.NodeName);
-                    newNodeNameCell.appendChild(newNodeNameText);
-                    var newNodeAddressText = document.createTextNode(node.NodeAddress);
-                    newNodeAddressCell.appendChild(newNodeAddressText);
-                    var newTransactionTimeText = document.createTextNode(`${last_transaction_time.toString()}`);
-                    newTransactionTimeCell.appendChild(newTransactionTimeText);
-                });
-            };
+            // Then use this sorted array to populate the table
+            var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
+            for(let nodeInfo of nodeInfoArray){
+                var newRow = tbodyRef.insertRow();
+
+                // If LastTransaction is greater than 22, set the row's background color to red
+                if(nodeInfo.LastTransaction > 22){
+                    newRow.style.backgroundColor = '#f73b3b';
+                }
+
+                var newNodeNameCell = newRow.insertCell();
+                newNodeNameCell.setAttribute("data-label","Node Name");
+                var newNodeNameText = document.createTextNode(nodeInfo.NodeName);
+                newNodeNameCell.appendChild(newNodeNameText);
+
+                var newNodeAddressCell = newRow.insertCell();
+                newNodeAddressCell.setAttribute("data-label","Node Address");
+                var aElem = document.createElement('a');
+                aElem.href='https://blockexplorer.bloxberg.org/address/'+ nodeInfo.NodeAddress +'/transactions';
+                aElem.target = '_blank';
+                aElem.rel = 'noopener noreferrer';
+                // Create a variable to hold the address value based on screen size
+                var newNodeAddressValue;
+                // Check if the device is a mobile device
+                if (window.innerWidth <= 600) {
+                newNodeAddressValue = nodeInfo.NodeAddress.substring(0, 4) + '...' + nodeInfo.NodeAddress.substring(nodeInfo.NodeAddress.length - 4);
+                } else {
+                newNodeAddressValue = nodeInfo.NodeAddress;
+                }
+                var newNodeAddressText = document.createTextNode(newNodeAddressValue);
+                aElem.appendChild(newNodeAddressText);
+                newNodeAddressCell.appendChild(aElem);
+
+                var newTransactionTimeCell = newRow.insertCell();
+                newTransactionTimeCell.setAttribute("data-label","Hours since Last Transaction");
+                var newTransactionTimeText = document.createTextNode(`${nodeInfo.LastTransaction.toString()}`);
+                newTransactionTimeCell.appendChild(newTransactionTimeText);
+            }
         });
     });
+});
 
-  </script>
-  <title>
-    Ethernity Cloud Nodes Monitor
-  </title>
+
+  </script> 
  </head> 
  <body> 
   <!--<div id="blockchain"></div>-->
-
+  
   <center><img src="https://avatars.githubusercontent.com/u/66076991?v=4" alt="Ethernity Cloud Logo"></center>
 
   <table id="myTable" style="width:100%">
@@ -89,8 +156,7 @@
 
     </tbody>
   </table>
-  <footer>
-    Developed by Schipix with &#10084;&#65039; for the Ethernity Cloud community
-  </footer>
+  <br><br>
+  <footer>Developed by Schipix with &#10084;&#65039; for the Ethernity Cloud community</footer>
  </body>
 </html>
