@@ -8,6 +8,7 @@
           margin-left: auto;
           margin-right: auto;
         }
+
         table, th, td {
           border: 1px solid black;
           border-radius: 10px;
@@ -15,6 +16,7 @@
         th {
           background-color: #96D4D4;
         }
+
         footer {
           border: 2px solid #96D4D4;
           bottom: 10;
@@ -57,6 +59,11 @@
                 font-weight: bold;
             }
         }
+
+        .sort-container {
+        text-align: right;
+        margin-bottom: 10px;
+        }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="3600">
@@ -65,6 +72,53 @@
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.0.2.js"></script>
   <!--<script type="module" src="NodeImporter.js"></script>-->
   <script type="text/javascript">
+
+    // Sort function
+    function sortTable() {
+        let table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("myTable");
+        let sortColumn = document.getElementById("sortColumn").value;
+        switching = true;
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[columnIndex(sortColumn)];
+                y = rows[i + 1].getElementsByTagName("TD")[columnIndex(sortColumn)];
+                if (sortColumn === "LastTransaction") {
+                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+
+    function columnIndex(columnName) {
+        switch (columnName) {
+            case "NodeName":
+                return 0;
+            case "NodeAddress":
+                return 1;
+            case "LastTransaction":
+                return 2;
+            default:
+                return 0;
+        }
+    }
+
+    // THIS IS WHERE YOU HAVE TO FILL IN THE DATA ABOUT YOUR NODES!!!
     const nodes_array = [
         {NodeName:"HOSTNAME1",NodeAddress:"0x0000000000000000000000000000000000000001"},
         {NodeName:"HOSTNAME2",NodeAddress:"0x0000000000000000000000000000000000000002"},
@@ -104,11 +158,13 @@ $(window).load(function(){
                     newRow.style.backgroundColor = '#f73b3b';
                 }
 
+                // Fill in the node name in the cell
                 var newNodeNameCell = newRow.insertCell();
                 newNodeNameCell.setAttribute("data-label","Node Name");
                 var newNodeNameText = document.createTextNode(nodeInfo.NodeName);
                 newNodeNameCell.appendChild(newNodeNameText);
 
+                // Fill in the node address in the cell as a link to the blockexplorer for more information about the transaction calls
                 var newNodeAddressCell = newRow.insertCell();
                 newNodeAddressCell.setAttribute("data-label","Node Address");
                 var aElem = document.createElement('a');
@@ -127,6 +183,7 @@ $(window).load(function(){
                 aElem.appendChild(newNodeAddressText);
                 newNodeAddressCell.appendChild(aElem);
 
+                // Fill in the time since the last transaction in the cell
                 var newTransactionTimeCell = newRow.insertCell();
                 newTransactionTimeCell.setAttribute("data-label","Hours since Last Transaction");
                 var newTransactionTimeText = document.createTextNode(`${nodeInfo.LastTransaction.toString()}`);
@@ -139,24 +196,35 @@ $(window).load(function(){
 
   </script> 
  </head> 
- <body> 
-  <!--<div id="blockchain"></div>-->
-  
-  <center><img src="https://avatars.githubusercontent.com/u/66076991?v=4" alt="Ethernity Cloud Logo"></center>
+    <body> 
+        <!--<div id="blockchain"></div>-->
+    
+        <center><img src="https://avatars.githubusercontent.com/u/66076991?v=4" alt="Ethernity Cloud Logo"></center>
 
-  <table id="myTable" style="width:100%">
-    <thead>
-        <tr>
-            <th>Node Name</th>
-            <th>Node Address</th>
-            <th>Hours since<br>Last Transaction</th>
-        </tr>
-    </thead>
-    <tbody>
+        <!--Sort button-->
+        <div class="sort-container">
+            <button onclick="sortTable()">Sort</button>
+            <select id="sortColumn">
+                <option value="NodeName">Node Name</option>
+                <option value="NodeAddress">Node Address</option>
+                <option value="LastTransaction" selected>Last Transaction</option>
+            </select>
+        </div>
+        
+        <!--The table where the information will be displayed after processing the fetched data-->
+        <table id="myTable" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Node Name</th>
+                    <th>Node Address</th>
+                    <th>Hours since<br>Last Transaction</th>
+                </tr>
+            </thead>
+            <tbody>
 
-    </tbody>
-  </table>
-  <br><br>
-  <footer>Developed by Schipix with &#10084;&#65039; for the Ethernity Cloud community</footer>
- </body>
+            </tbody>
+        </table>
+        <br><br>
+        <footer>Developed by Schipix with &#10084;&#65039; for the Ethernity Cloud community</footer>
+    </body>
 </html>
