@@ -123,75 +123,75 @@
         {NodeName:"HOSTNAME1",NodeAddress:"0x0000000000000000000000000000000000000001"},
         {NodeName:"HOSTNAME2",NodeAddress:"0x0000000000000000000000000000000000000002"},
         {NodeName:"HOSTNAME3",NodeAddress:"0x0000000000000000000000000000000000000003"}
-];
+    ];
 
-$(window).load(function(){
-    $(function() {
-        let nodeInfoArray = [];
-        let promises = nodes_array.map(node => {
-            return $.getJSON(`https://blockexplorer.bloxberg.org/api?module=account&action=txlist&address=${node.NodeAddress}`, function(data) {
-                var node_transactions_array = data.result;
-                var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
+    $(window).load(function(){
+        $(function() {
+            let nodeInfoArray = [];
+            let promises = nodes_array.map(node => {
+                return $.getJSON(`https://blockexplorer.bloxberg.org/api?module=account&action=txlist&address=${node.NodeAddress}`, function(data) {
+                    var node_transactions_array = data.result;
+                    var last_transaction_time = Math.round((Date.now()/1000 - (node_transactions_array[0]).timeStamp)/3600);
 
-                const NodeInfo = {
-                    NodeName: node.NodeName,
-                    NodeAddress: node.NodeAddress,
-                    LastTransaction: last_transaction_time
-                };
+                    const NodeInfo = {
+                        NodeName: node.NodeName,
+                        NodeAddress: node.NodeAddress,
+                        LastTransaction: last_transaction_time
+                    };
 
-                nodeInfoArray.push(NodeInfo);
+                    nodeInfoArray.push(NodeInfo);
+                });
+            });
+
+            // When all promises (requests) have finished...
+            $.when.apply($, promises).then(function() {
+                // Sort the nodeInfoArray by LastTransaction in ascending order
+                nodeInfoArray.sort((b, a) => a.LastTransaction - b.LastTransaction);
+
+                // Then use this sorted array to populate the table
+                var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
+                for(let nodeInfo of nodeInfoArray){
+                    var newRow = tbodyRef.insertRow();
+
+                    // If LastTransaction is greater than 22, set the row's background color to red
+                    if(nodeInfo.LastTransaction >= 22){
+                        newRow.style.backgroundColor = '#f73b3b';
+                    }
+
+                    // Fill in the node name in the cell
+                    var newNodeNameCell = newRow.insertCell();
+                    newNodeNameCell.setAttribute("data-label","Node Name");
+                    var newNodeNameText = document.createTextNode(nodeInfo.NodeName);
+                    newNodeNameCell.appendChild(newNodeNameText);
+
+                    // Fill in the node address in the cell as a link to the blockexplorer for more information about the transaction calls
+                    var newNodeAddressCell = newRow.insertCell();
+                    newNodeAddressCell.setAttribute("data-label","Node Address");
+                    var aElem = document.createElement('a');
+                    aElem.href='https://blockexplorer.bloxberg.org/address/'+ nodeInfo.NodeAddress +'/transactions';
+                    aElem.target = '_blank';
+                    aElem.rel = 'noopener noreferrer';
+                    // Create a variable to hold the address value based on screen size
+                    var newNodeAddressValue;
+                    // Check if the device is a mobile device
+                    if (window.innerWidth <= 600) {
+                    newNodeAddressValue = nodeInfo.NodeAddress.substring(0, 4) + '...' + nodeInfo.NodeAddress.substring(nodeInfo.NodeAddress.length - 4);
+                    } else {
+                    newNodeAddressValue = nodeInfo.NodeAddress;
+                    }
+                    var newNodeAddressText = document.createTextNode(newNodeAddressValue);
+                    aElem.appendChild(newNodeAddressText);
+                    newNodeAddressCell.appendChild(aElem);
+
+                    // Fill in the time since the last transaction in the cell
+                    var newTransactionTimeCell = newRow.insertCell();
+                    newTransactionTimeCell.setAttribute("data-label","Hours since Last Transaction");
+                    var newTransactionTimeText = document.createTextNode(`${nodeInfo.LastTransaction.toString()}`);
+                    newTransactionTimeCell.appendChild(newTransactionTimeText);
+                }
             });
         });
-
-        // When all promises (requests) have finished...
-        $.when.apply($, promises).then(function() {
-            // Sort the nodeInfoArray by LastTransaction in ascending order
-            nodeInfoArray.sort((b, a) => a.LastTransaction - b.LastTransaction);
-
-            // Then use this sorted array to populate the table
-            var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
-            for(let nodeInfo of nodeInfoArray){
-                var newRow = tbodyRef.insertRow();
-
-                // If LastTransaction is greater than 22, set the row's background color to red
-                if(nodeInfo.LastTransaction >= 22){
-                    newRow.style.backgroundColor = '#f73b3b';
-                }
-
-                // Fill in the node name in the cell
-                var newNodeNameCell = newRow.insertCell();
-                newNodeNameCell.setAttribute("data-label","Node Name");
-                var newNodeNameText = document.createTextNode(nodeInfo.NodeName);
-                newNodeNameCell.appendChild(newNodeNameText);
-
-                // Fill in the node address in the cell as a link to the blockexplorer for more information about the transaction calls
-                var newNodeAddressCell = newRow.insertCell();
-                newNodeAddressCell.setAttribute("data-label","Node Address");
-                var aElem = document.createElement('a');
-                aElem.href='https://blockexplorer.bloxberg.org/address/'+ nodeInfo.NodeAddress +'/transactions';
-                aElem.target = '_blank';
-                aElem.rel = 'noopener noreferrer';
-                // Create a variable to hold the address value based on screen size
-                var newNodeAddressValue;
-                // Check if the device is a mobile device
-                if (window.innerWidth <= 600) {
-                newNodeAddressValue = nodeInfo.NodeAddress.substring(0, 4) + '...' + nodeInfo.NodeAddress.substring(nodeInfo.NodeAddress.length - 4);
-                } else {
-                newNodeAddressValue = nodeInfo.NodeAddress;
-                }
-                var newNodeAddressText = document.createTextNode(newNodeAddressValue);
-                aElem.appendChild(newNodeAddressText);
-                newNodeAddressCell.appendChild(aElem);
-
-                // Fill in the time since the last transaction in the cell
-                var newTransactionTimeCell = newRow.insertCell();
-                newTransactionTimeCell.setAttribute("data-label","Hours since Last Transaction");
-                var newTransactionTimeText = document.createTextNode(`${nodeInfo.LastTransaction.toString()}`);
-                newTransactionTimeCell.appendChild(newTransactionTimeText);
-            }
-        });
     });
-});
 
 
   </script> 
