@@ -87,11 +87,13 @@
                 x = rows[i].getElementsByTagName("TD")[columnIndex(sortColumn)];
                 y = rows[i + 1].getElementsByTagName("TD")[columnIndex(sortColumn)];
                 if (sortColumn === "LastTransaction") {
-                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                    // For "LastTransaction", a row should switch places with the next one if the current row has a lower value
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
                         shouldSwitch = true;
                         break;
                     }
                 } else {
+                    // For the other columns, a row should switch places with the next one if the current row has a higher value
                     if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
                         shouldSwitch = true;
                         break;
