@@ -100,7 +100,7 @@ $(window).load(function(){
                 var newRow = tbodyRef.insertRow();
 
                 // If LastTransaction is greater than 22, set the row's background color to red
-                if(nodeInfo.LastTransaction > 22){
+                if(nodeInfo.LastTransaction >= 22){
                     newRow.style.backgroundColor = '#f73b3b';
                 }
 
