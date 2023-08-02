@@ -17,3 +17,6 @@
 
 # Future developements as of 12.07.2023:
 #   - Load the nodes list from an external JSON file
+
+# Future developements as of 02.08.2023
+#   - Adapt the queries to accommodate the API query limit of 20 calls
